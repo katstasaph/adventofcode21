@@ -14,7 +14,7 @@ def find_all_winners(boards)
 end
 
 def mark_boards!(boards, move)
-  boards.map! do |board|
+  boards.each do |board|
     board.map! { |square| square == move ? nil : square }
   end
 end
