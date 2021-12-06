@@ -28,16 +28,6 @@ def breed_lanternfish(fish)
   fish.values.inject(:+)
 end
 
-def cycle_lanternfish!(fishes)
-  fishes.each do |fish|
-    if fish == 0
-      new_fish << 8
-    end
-    fish
-  end
-  fishes.concat(new_fish)
-end
-
 fish = File.read('advent6.txt').split(',').map { |num| num.to_i }
 fish_hash = create_fish_hash(fish)
 
