@@ -28,8 +28,7 @@ p easy_digit_count.values.inject(:+)
 # segment e appears in 4 digits
 # segment f appears in 9 digits
 # segment g appears in 7 digits
-# Now that we know f, we can identify c easily, as it is the other character in the 2-character string
-# And now that we know b, c, and f we can identify d, it is the unaccounted-for character in the 4-character string
+# Now that we know b, c, and f we can identify d, it is the unaccounted-for character in the 4-character string
 # And since we know a, b, c, d, e, and f, we know the last character corresponds to g.
 
 DIGIT_SEGMENTS = {
