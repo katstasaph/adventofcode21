@@ -3,18 +3,15 @@ signal_hash = signal_data.map { |data| [data.take(10), data.drop(10)] }.to_h
 
 # part 1
 
-easy_digit_count = {1 => 0, 4 => 0, 7 => 0, 8 => 0}
+EASY_DIGIT_SEGMENT_COUNTS = [2, 3, 4, 7]
+
+easy_digit_count = 0
 output_values = signal_hash.values.flatten
 output_values.each do |output|
   length = output.length
-  case length
-  when 2 then easy_digit_count[1] += 1
-  when 3 then easy_digit_count[7] += 1
-  when 4 then easy_digit_count[4] += 1
-  when 7 then easy_digit_count[8] += 1
-  end
+  easy_digit_count += 1 if EASY_DIGIT_SEGMENT_COUNTS.include?(length)
 end
-p easy_digit_count.values.inject(:+)
+p easy_digit_count
 
 # part 2
 
@@ -45,7 +42,7 @@ DIGIT_SEGMENTS = {
 }
 
 def deduce_segment_mapping(signals)
-  segment_mapping = {a: nil, b: nil, c: nil, d: nil, e: nil, f: nil, g: nil}
+  segment_mapping = {}
   one_pattern = signals.select { |pattern| pattern.length == 2}[0]
   seven_pattern = signals.select { |pattern| pattern.length == 3}[0]
   four_pattern = signals.select { |pattern| pattern.length == 4}[0]
@@ -72,9 +69,8 @@ def decode_output(output, segment_mapping)
   DIGIT_SEGMENTS.key(decoded_segments)
 end
 
-output_numbers = []
-signal_hash.each do |signals, output|
+numbers = signal_hash.each_with_object([]) do |(signals, output), numbers|
   segment_mapping = deduce_segment_mapping(signals)
-  output_numbers << output.map { |output_chars| decode_output(output_chars, segment_mapping) }.join.to_i
+  numbers << output.map { |output_chars| decode_output(output_chars, segment_mapping) }.join.to_i
 end
-p output_numbers.inject(:+)
+p numbers.inject(:+)
