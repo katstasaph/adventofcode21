@@ -1,7 +1,3 @@
-# this place is not a place of honor
-# no highly esteemed deed is commemorated here
-# nothing valued is here, what is here was dangerous and repulsive to us, this place is best shunned and left uninhabited
-
 ROW_LENGTH = 100
 
 def get_adjacent_values(row, row_index, columns, column_index)
@@ -11,32 +7,35 @@ def get_adjacent_values(row, row_index, columns, column_index)
   adjacents
 end
 
-def find_basins(contiguous_indexes, adjacent_points)
+def possible_basin_points(x, y, contiguous, used = [])
+  [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].reject { |point| point[0] < 0 || point[1] < 0 || !contiguous.include?(point) || used.include?(point) }
+end
+
+def find_all_basins(contiguous_indexes)
   basins = []
-  basin_points = [contiguous_indexes[0]]
+  basin_points = []
   loop do
-    possible_expansions = []
-    basin_points.each do |point| 
-      adjacent_basin_points = adjacent_points[point]
-      adjacent_basin_points.each { |adjacent_point| possible_expansions << adjacent_point unless possible_expansions.include?(adjacent_point) }
-    end
-    rough_max = possible_expansions.flatten.max + 1
-    new_points = []
-    contiguous_indexes.each do |index| 
-      break if (index[0] > rough_max && index[1] > rough_max)
-      new_points << index if possible_expansions.include?(index) 
-    end
+    start_point = contiguous_indexes[0]
+    adjacent_points = possible_basin_points(start_point[0], start_point[1], contiguous_indexes)
+    basin_points = find_basin(contiguous_indexes, adjacent_points)
     contiguous_indexes.reject! { |index| basin_points.include?(index) }
-    if new_points.empty?
-      basins << basin_points
-      basin_points = [contiguous_indexes.min_by { |point| point[0] + point[1] }]
-      break if contiguous_indexes.empty?
-    else 
-      new_points.each { |point| basin_points << point unless basin_points.include?(point) }
+    basins << basin_points
+    break if contiguous_indexes.empty?
     end
+  basins
+end
+
+def find_basin(contiguous_indexes, adjacent_points, basin_points=[])
+  return basin_points if adjacent_points.empty?
+  loop do
+    adjacent_points.each do |point|
+      next if basin_points.include?(point)
+      basin_points << point
+      adjacent_basin_points = possible_basin_points(point[0], point[1], contiguous_indexes, basin_points)
+      new_basin_points = find_basin(contiguous_indexes, adjacent_basin_points, basin_points)
+    end
+    return basin_points
   end
-  largest_basins = basins.sort_by { |basin| basin.length }.last(3)
-  p largest_basins.inject(1) { |product, basin| product * basin.length }
 end
 
 # part 1
@@ -57,15 +56,16 @@ p risk_index
 
 new_height_map = File.read('advent9.txt').split.map { |row| row.chars.map { |chr| chr == "9" ? nil : chr.to_i }}
 contiguous_indexes = []
-adjacent_points = {}
 new_height_map.each_with_index do |row, row_index|
   row.each_with_index do |num, column_index|
     if num
       point = [row_index, column_index]
       contiguous_indexes << point
-      adjacent_indexes = [[row_index - 1, column_index], [row_index + 1, column_index], [row_index, column_index + 1], [row_index, column_index - 1]].reject { |point| point[0] < 0 || point[1] < 0 }
-      adjacent_points[point] = adjacent_indexes
     end
   end
 end
-find_basins(contiguous_indexes, adjacent_points) 
+basins = find_all_basins(contiguous_indexes) 
+largest_basins = basins.sort_by { |basin| basin.length }.last(3) 
+p largest_basins.inject(1) { |product, basin| product * basin.length }
+
+
